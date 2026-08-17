@@ -17,7 +17,6 @@
 # A script to strip all of the data we don't use out of ICU's data files
 # Run from $ICU_ROOT/source/data
 
-from __future__ import unicode_literals
 import re
 import os
 
@@ -25,10 +24,10 @@ import os
 def delete_matching(filename, strs):
     exprs = [re.compile(s) for s in strs]
 
-    with open(filename) as f:
-        lines = [line for line in f if not any(r.match(line.decode('utf-8')) for r in exprs)]
+    with open(filename, encoding='utf-8') as f:
+        lines = [line for line in f if not any(r.match(line) for r in exprs)]
 
-    with open(filename, 'w') as f:
+    with open(filename, 'w', encoding='utf-8') as f:
         for line in lines:
             f.write(line)
 
@@ -45,8 +44,7 @@ def parse_txt(filename):
     cur = root
     stack = [root]
     comment = False
-    for line in open(filename):
-        line = line.decode('utf-8')
+    for line in open(filename, encoding='utf-8'):
         line = line.strip()
         if len(line) == 0:
             continue
@@ -73,14 +71,14 @@ def parse_txt(filename):
 
         m = re.match('(.*){"(.*)"}', line)
         if not m:
-            print line
+            print(line)
         else:
             cur[m.group(1)] = m.group(2)
 
     return root
 
 def remove_sections(root):
-    for child in root.itervalues():
+    for child in root.values():
         child.pop('Keys', None)
         child.pop('LanguagesShort', None)
         child.pop('Types', None)
@@ -91,7 +89,7 @@ def remove_sections(root):
         child.pop('Scripts%stand-alone', None)
 
 def remove_languages(root):
-    for lang, child in root.iteritems():
+    for lang, child in root.items():
         # We only care about a language's name in that language
         lang = lang.split('_')[0]
         trimmed = {}
@@ -103,7 +101,7 @@ def remove_languages(root):
 # Scripts which are actually used by stuff
 SCRIPTS = ['Cyrl', 'Latn', 'Arab', 'Vaii', 'Hans', 'Hant']
 def remove_scripts(root):
-    for lang, child in root.iteritems():
+    for lang, child in root.items():
         v = child.get('Scripts')
         if not v:
             continue
@@ -121,20 +119,20 @@ def write_dict(name, value, out, indent):
     child_indent = indent + '    '
 
     out.write(indent)
-    out.write(name.encode('utf-8'))
+    out.write(name)
     out.write('{\n')
     for k in sorted(value.keys()):
         v = value[k]
         if type(v) == dict:
             write_dict(k, v, out, child_indent)
         else:
-            out.write(('%s%s{"%s"}\n' % (child_indent, k, v)).encode('utf-8'))
+            out.write('%s%s{"%s"}\n' % (child_indent, k, v))
     out.write(indent)
     out.write('}\n')
 
 def write_file(root, filename):
-    with open(filename, 'w') as f:
-        for k, v in root.iteritems():
+    with open(filename, 'w', encoding='utf-8') as f:
+        for k, v in root.items():
             write_dict(k, v, f, '')
 
 def minify_lang(filename):
@@ -287,7 +285,7 @@ def gather_regions():
 
 REGIONS = gather_regions()
 def remove_countries(root):
-    for lang, child in root.iteritems():
+    for lang, child in root.items():
         v = child.get('Countries', {})
         if not v: continue
 

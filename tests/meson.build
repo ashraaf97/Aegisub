@@ -33,6 +33,7 @@ test_sources = [
     'tests/signals.cpp',
     'tests/split.cpp',
     'tests/syntax_highlight.cpp',
+    'tests/text_segments.cpp',
     'tests/thesaurus.cpp',
     'tests/time.cpp',
     'tests/type_name.cpp',

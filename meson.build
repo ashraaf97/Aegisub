@@ -150,6 +150,11 @@ else
         'wxBUILD_SHARED': build_shared,
         'wxBUILD_MONOLITHIC': true, # otherwise breaks project generation w/ meson
         'wxUSE_WEBVIEW': false,
+        # wxWebRequest is how the AI client talks to Ollama Cloud: it wraps
+        # WinHTTP here and NSURLSession/libcurl elsewhere, so we get HTTPS
+        # without taking on OpenSSL or libcurl ourselves. On by default, but
+        # this is a custom monolithic build, so say so explicitly.
+        'wxUSE_WEBREQUEST': true,
         'wxUSE_REGEX': 'builtin',
         'wxUSE_IMAGE': true,
         'CMAKE_BUILD_TYPE': build_type,

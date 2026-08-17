@@ -1,0 +1,15 @@
+version: 2
+
+updates:
+  # Dependabot has no ecosystem for Meson wraps, so subprojects/*.wrap still
+  # have to be bumped by hand. This at least keeps the workflow actions from
+  # silently rotting until a runner drops the Node version they need.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']

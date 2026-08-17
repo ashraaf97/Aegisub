@@ -1,6 +1,11 @@
+# Upstream is gitlab.freedesktop.org, but that host has been returning 502s and
+# hanging on clone, which fails the build here: libass resolves freetype2
+# through this wrap, so an outage there takes out configure entirely. The
+# GitHub mirror is official and carries the same tags -- VER-2-14-3 resolves to
+# commit 0a0221a1 on both.
 [wrap-git]
 directory = freetype2
-url = https://gitlab.freedesktop.org/freetype/freetype.git
+url = https://github.com/freetype/freetype.git
 revision = VER-2-14-3
 
 [provide]

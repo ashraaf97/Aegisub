@@ -77,7 +77,7 @@ AssFile::AssFile(const AssFile &from)
 		[](AssDialogue *e) { delete e; });
 }
 
-void AssFile::swap(AssFile& from) throw() {
+void AssFile::swap(AssFile& from) noexcept {
 	Info.swap(from.Info);
 	Styles.swap(from.Styles);
 	Events.swap(from.Events);

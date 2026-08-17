@@ -23,7 +23,6 @@
 
 #include <libaegisub/exception.h>
 #include <libaegisub/hotkey.h>
-#include <libaegisub/make_unique.h>
 
 #include <algorithm>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -256,7 +255,7 @@ public:
 };
 
 HotkeyDataViewModel::HotkeyDataViewModel(Preferences *parent)
-: root(agi::make_unique<HotkeyModelRoot>(this))
+: root(std::make_unique<HotkeyModelRoot>(this))
 , parent(parent)
 {
 }

@@ -275,7 +275,9 @@ wxString LocalizedLanguageName(wxString const& lang) {
 		icu::UnicodeString ustr;
 		iculoc.getDisplayName(iculoc, ustr);
 #ifdef _MSC_VER
-		return wxString(ustr.getBuffer());
+		// ICU's UChar is char16_t, which is a distinct type from wchar_t even
+		// though both are UTF-16 code units on Windows.
+		return wxString(reinterpret_cast<const wchar_t *>(ustr.getBuffer()), ustr.length());
 #else
 		std::string utf8;
 		ustr.toUTF8String(utf8);

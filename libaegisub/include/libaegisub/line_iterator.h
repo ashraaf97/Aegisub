@@ -21,6 +21,7 @@
 #include <iterator>
 #include <memory>
 
+#include <cstddef>
 #include <cstdint>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
@@ -55,7 +56,17 @@ public:
 /// @class line_iterator
 /// @brief An iterator over lines in a stream
 template<class OutputType = std::string>
-class line_iterator final : public line_iterator_base, public std::iterator<std::input_iterator_tag, OutputType> {
+class line_iterator final : public line_iterator_base {
+public:
+	// std::iterator was deprecated in C++17; spell the iterator traits out
+	// rather than inheriting them.
+	using iterator_category = std::input_iterator_tag;
+	using value_type = OutputType;
+	using difference_type = std::ptrdiff_t;
+	using pointer = OutputType *;
+	using reference = OutputType &;
+
+private:
 	OutputType value; ///< Value to return when this is dereference
 
 	/// @brief Convert a string to the output type

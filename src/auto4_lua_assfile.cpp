@@ -44,7 +44,6 @@
 #include <libaegisub/exception.h>
 #include <libaegisub/log.h>
 #include <libaegisub/lua/utils.h>
-#include <libaegisub/make_unique.h>
 
 #include <algorithm>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -256,7 +255,7 @@ namespace Automation4 {
 
 		std::unique_ptr<AssEntry> result;
 		if (lclass == "info")
-			result = agi::make_unique<AssInfo>(get_string_field(L, "key", "info"), get_string_field(L, "value", "info"));
+			result = std::make_unique<AssInfo>(get_string_field(L, "key", "info"), get_string_field(L, "value", "info"));
 		else if (lclass == "style") {
 			auto sty = new AssStyle;
 			result.reset(sty);
@@ -388,7 +387,7 @@ namespace Automation4 {
 			// Just in case an insane user inserted non-info lines into the
 			// script info section...
 			while (lines[i]) ++i;
-			lines_to_delete.emplace_back(agi::make_unique<AssInfo>(info));
+			lines_to_delete.emplace_back(std::make_unique<AssInfo>(info));
 			lines[i++] = lines_to_delete.back().get();
 		}
 		script_info_copied = true;

@@ -41,7 +41,6 @@
 
 #include <libaegisub/log.h>
 #include <libaegisub/lua/utils.h>
-#include <libaegisub/make_unique.h>
 #include <libaegisub/split.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -393,26 +392,26 @@ namespace Automation4 {
 
 			// Check control class and create relevant control
 			if (controlclass == "label")
-				ctl = agi::make_unique<LuaControl::Label>(L);
+				ctl = std::make_unique<LuaControl::Label>(L);
 			else if (controlclass == "edit")
-				ctl = agi::make_unique<LuaControl::Edit>(L);
+				ctl = std::make_unique<LuaControl::Edit>(L);
 			else if (controlclass == "intedit")
-				ctl = agi::make_unique<LuaControl::IntEdit>(L);
+				ctl = std::make_unique<LuaControl::IntEdit>(L);
 			else if (controlclass == "floatedit")
-				ctl = agi::make_unique<LuaControl::FloatEdit>(L);
+				ctl = std::make_unique<LuaControl::FloatEdit>(L);
 			else if (controlclass == "textbox")
-				ctl = agi::make_unique<LuaControl::Textbox>(L);
+				ctl = std::make_unique<LuaControl::Textbox>(L);
 			else if (controlclass == "dropdown")
-				ctl = agi::make_unique<LuaControl::Dropdown>(L);
+				ctl = std::make_unique<LuaControl::Dropdown>(L);
 			else if (controlclass == "checkbox")
-				ctl = agi::make_unique<LuaControl::Checkbox>(L);
+				ctl = std::make_unique<LuaControl::Checkbox>(L);
 			else if (controlclass == "color")
-				ctl = agi::make_unique<LuaControl::Color>(L, false);
+				ctl = std::make_unique<LuaControl::Color>(L, false);
 			else if (controlclass == "coloralpha")
-				ctl = agi::make_unique<LuaControl::Color>(L, true);
+				ctl = std::make_unique<LuaControl::Color>(L, true);
 			else if (controlclass == "alpha")
 				// FIXME
-				ctl = agi::make_unique<LuaControl::Edit>(L);
+				ctl = std::make_unique<LuaControl::Edit>(L);
 			else
 				error(L, "bad control table entry");
 

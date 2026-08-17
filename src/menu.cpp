@@ -33,7 +33,6 @@
 #include <libaegisub/hotkey.h>
 #include <libaegisub/json.h>
 #include <libaegisub/log.h>
-#include <libaegisub/make_unique.h>
 #include <libaegisub/path.h>
 #include <libaegisub/split.h>
 
@@ -514,7 +513,7 @@ namespace menu {
 		}
 #endif
 
-		auto menu = agi::make_unique<CommandMenuBar>(c);
+		auto menu = std::make_unique<CommandMenuBar>(c);
 		for (auto const& item : get_menu(name)) {
 			std::string submenu, disp;
 			read_entry(item, "submenu", &submenu);
@@ -548,7 +547,7 @@ namespace menu {
 	}
 
 	std::unique_ptr<wxMenu> GetMenu(std::string const& name, agi::Context *c) {
-		auto menu = agi::make_unique<CommandMenu>(c);
+		auto menu = std::make_unique<CommandMenu>(c);
 		build_menu(name, c, &menu->cm, menu.get());
 		menu->Bind(wxEVT_MENU_OPEN, &CommandManager::OnMenuOpen, &menu->cm);
 		menu->Bind(wxEVT_MENU, &CommandManager::OnMenuClick, &menu->cm);

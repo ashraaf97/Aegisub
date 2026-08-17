@@ -104,7 +104,7 @@ AsyncVideoProvider::~AsyncVideoProvider() {
 	worker->Sync([]{});
 }
 
-void AsyncVideoProvider::LoadSubtitles(const AssFile *new_subs) throw() {
+void AsyncVideoProvider::LoadSubtitles(const AssFile *new_subs) noexcept {
 	uint_fast32_t req_version = ++version;
 
 	auto copy = new AssFile(*new_subs);
@@ -115,7 +115,7 @@ void AsyncVideoProvider::LoadSubtitles(const AssFile *new_subs) throw() {
 	});
 }
 
-void AsyncVideoProvider::UpdateSubtitles(const AssFile *new_subs, const AssDialogue *changed) throw() {
+void AsyncVideoProvider::UpdateSubtitles(const AssFile *new_subs, const AssDialogue *changed) noexcept {
 	uint_fast32_t req_version = ++version;
 
 	// Copy just the line which were changed, then replace the line at the
@@ -134,7 +134,7 @@ void AsyncVideoProvider::UpdateSubtitles(const AssFile *new_subs, const AssDialo
 	});
 }
 
-void AsyncVideoProvider::RequestFrame(int new_frame, double new_time) throw() {
+void AsyncVideoProvider::RequestFrame(int new_frame, double new_time) noexcept {
 	uint_fast32_t req_version = ++version;
 
 	worker->Async([=]{

@@ -42,7 +42,6 @@
 #include <libaegisub/format.h>
 #include <libaegisub/fs.h>
 #include <libaegisub/path.h>
-#include <libaegisub/make_unique.h>
 #include <libaegisub/split.h>
 
 #include <boost/algorithm/string/replace.hpp>
@@ -464,7 +463,7 @@ namespace Automation4 {
 			wxLogError(_("The file was not recognised as an Automation script: %s"), filename.wstring());
 		}
 
-		return create_unknown ? agi::make_unique<UnknownScript>(filename) : nullptr;
+		return create_unknown ? std::make_unique<UnknownScript>(filename) : nullptr;
 	}
 
 	std::vector<std::unique_ptr<ScriptFactory>>& ScriptFactory::Factories()

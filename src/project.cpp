@@ -42,7 +42,6 @@
 #include <libaegisub/fs.h>
 #include <libaegisub/keyframe.h>
 #include <libaegisub/log.h>
-#include <libaegisub/make_unique.h>
 #include <libaegisub/path.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -289,7 +288,7 @@ bool Project::DoLoadVideo(agi::fs::path const& path) {
 
 	try {
 		auto old_matrix = context->ass->GetScriptInfo("YCbCr Matrix");
-		video_provider = agi::make_unique<AsyncVideoProvider>(path, old_matrix, context->videoController.get(), progress);
+		video_provider = std::make_unique<AsyncVideoProvider>(path, old_matrix, context->videoController.get(), progress);
 	}
 	catch (agi::UserCancelException const&) { return false; }
 	catch (agi::fs::FileSystemError const& err) {

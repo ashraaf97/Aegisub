@@ -28,7 +28,6 @@
 #include "libaegisub/io.h"
 #include "libaegisub/log.h"
 #include "libaegisub/option_value.h"
-#include "libaegisub/make_unique.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
@@ -64,7 +63,7 @@ class ConfigVisitor final : public json::ConstVisitor {
 		for (json::Object const& obj : src)
 			arr.push_back((typename OptionValueType::value_type::value_type)(obj.begin()->second));
 
-		values.push_back(agi::make_unique<OptionValueType>(name, std::move(arr)));
+		values.push_back(std::make_unique<OptionValueType>(name, std::move(arr)));
 	}
 
 	void Visit(const json::Object& object) {
@@ -107,11 +106,11 @@ class ConfigVisitor final : public json::ConstVisitor {
 	}
 
 	void Visit(int64_t number) {
-		values.push_back(agi::make_unique<OptionValueInt>(name, number));
+		values.push_back(std::make_unique<OptionValueInt>(name, number));
 	}
 
 	void Visit(double number) {
-		values.push_back(agi::make_unique<OptionValueDouble>(name, number));
+		values.push_back(std::make_unique<OptionValueDouble>(name, number));
 	}
 
 	void Visit(const json::String& string) {
@@ -121,14 +120,14 @@ class ConfigVisitor final : public json::ConstVisitor {
 			(size >= 10 && boost::starts_with(string, "rgb(")) ||
 			((size == 9 || size == 10) && boost::starts_with(string, "&H")))
 		{
-			values.push_back(agi::make_unique<OptionValueColor>(name, string));
+			values.push_back(std::make_unique<OptionValueColor>(name, string));
 		} else {
-			values.push_back(agi::make_unique<OptionValueString>(name, string));
+			values.push_back(std::make_unique<OptionValueString>(name, string));
 		}
 	}
 
 	void Visit(bool boolean) {
-		values.push_back(agi::make_unique<OptionValueBool>(name, boolean));
+		values.push_back(std::make_unique<OptionValueBool>(name, boolean));
 	}
 
 	void Visit(const json::Null& null) {

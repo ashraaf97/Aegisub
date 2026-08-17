@@ -22,7 +22,9 @@
 #include "libaegisub/scoped_ptr.h"
 
 #ifdef WITH_UCHARDET
-#include <uchardet/uchardet.h>
+// Both the pkg-config module and the Meson subproject put uchardet.h
+// directly on the include path.
+#include <uchardet.h>
 #endif
 
 namespace agi { namespace charset {

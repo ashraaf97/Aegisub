@@ -113,7 +113,7 @@ public:
 	/// @return Pointer to style or nullptr
 	AssStyle *GetStyle(std::string const& name);
 
-	void swap(AssFile &) throw();
+	void swap(AssFile &) noexcept;
 
 	/// @brief Get the script resolution
 	/// @param[out] w Width

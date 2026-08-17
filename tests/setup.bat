@@ -46,3 +46,6 @@ mkdir data\keyframe
 xcopy "%~dp0\keyframe" data\keyframe
 
 ping -n 2 127.0.0.1 > nul
+
+rem Marker file so the build system can tell the setup ran.
+copy nul applied_test_setup

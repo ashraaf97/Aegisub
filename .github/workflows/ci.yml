@@ -39,9 +39,13 @@ jobs:
           arch: x64
 
       # The wrap downloads dominate a cold build, so cache them separately
-      # from the compiled output.
-      - name: Cache subproject downloads
-        uses: actions/cache@v4
+      # from the compiled output. Restore and save are split rather than using
+      # actions/cache, whose save step is skipped when the job fails -- the
+      # downloads are perfectly good even if the build afterwards is not, and
+      # discarding them means the next run pays for a cold fetch again.
+      - name: Restore subproject downloads
+        id: packagecache
+        uses: actions/cache/restore@v4
         with:
           path: subprojects/packagecache
           key: packagecache-${{ runner.os }}-${{ hashFiles('subprojects/*.wrap') }}
@@ -52,6 +56,16 @@ jobs:
           meson setup build-win
           --buildtype=${{ matrix.buildtype }}
           --default-library=static
+
+      # The wraps are fetched during configure, so save here rather than at
+      # the end of the job.
+      - name: Save subproject downloads
+        if: always() && steps.packagecache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: subprojects/packagecache
+          key: packagecache-${{ runner.os }}-${{ hashFiles('subprojects/*.wrap') }}
 
       - name: Build
         run: meson compile -C build-win

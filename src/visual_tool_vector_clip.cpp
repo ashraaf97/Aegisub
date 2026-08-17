@@ -23,7 +23,6 @@
 #include "options.h"
 #include "selection_controller.h"
 
-#include <libaegisub/make_unique.h>
 
 #include <algorithm>
 #include <boost/range/algorithm/copy.hpp>
@@ -174,7 +173,7 @@ void VisualToolVectorClip::Draw() {
 }
 
 void VisualToolVectorClip::MakeFeature(size_t idx) {
-	auto feat = agi::make_unique<Feature>();
+	auto feat = std::make_unique<Feature>();
 	feat->idx = idx;
 
 	auto const& curve = spline[idx];
@@ -195,7 +194,7 @@ void VisualToolVectorClip::MakeFeature(size_t idx) {
 		feat->type = DRAG_SMALL_SQUARE;
 		features.push_back(*feat.release());
 
-		feat = agi::make_unique<Feature>();
+		feat = std::make_unique<Feature>();
 		feat->idx = idx;
 		feat->pos = curve.p3;
 		feat->point = 2;
@@ -203,7 +202,7 @@ void VisualToolVectorClip::MakeFeature(size_t idx) {
 		features.push_back(*feat.release());
 
 		// End point
-		feat = agi::make_unique<Feature>();
+		feat = std::make_unique<Feature>();
 		feat->idx = idx;
 		feat->pos = curve.p4;
 		feat->point = 3;

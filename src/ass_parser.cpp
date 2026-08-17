@@ -23,7 +23,6 @@
 #include "subtitle_format.h"
 
 #include <libaegisub/ass/uuencode.h>
-#include <libaegisub/make_unique.h>
 #include <libaegisub/util.h>
 
 #include <algorithm>
@@ -95,7 +94,7 @@ public:
 };
 
 AssParser::AssParser(AssFile *target, int version)
-: property_handler(agi::make_unique<HeaderToProperty>())
+: property_handler(std::make_unique<HeaderToProperty>())
 , target(target)
 , version(version)
 , state(&AssParser::ParseScriptInfoLine)
@@ -188,12 +187,12 @@ void AssParser::ParseStyleLine(std::string const& data) {
 
 void AssParser::ParseFontLine(std::string const& data) {
 	if (boost::starts_with(data, "fontname: "))
-		attach = agi::make_unique<AssAttachment>(data, AssEntryGroup::FONT);
+		attach = std::make_unique<AssAttachment>(data, AssEntryGroup::FONT);
 }
 
 void AssParser::ParseGraphicsLine(std::string const& data) {
 	if (boost::starts_with(data, "filename: "))
-		attach = agi::make_unique<AssAttachment>(data, AssEntryGroup::GRAPHIC);
+		attach = std::make_unique<AssAttachment>(data, AssEntryGroup::GRAPHIC);
 }
 
 void AssParser::ParseExtradataLine(std::string const &data) {

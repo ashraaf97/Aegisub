@@ -37,7 +37,6 @@
 
 #include <libaegisub/of_type_adaptor.h>
 #include <libaegisub/split.h>
-#include <libaegisub/make_unique.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -201,7 +200,7 @@ std::vector<std::unique_ptr<AssDialogueBlock>> AssDialogue::ParseTags() const {
 
 	// Empty line, make an empty block
 	if (Text.get().empty()) {
-		Blocks.push_back(agi::make_unique<AssDialogueBlockPlain>());
+		Blocks.push_back(std::make_unique<AssDialogueBlockPlain>());
 		return Blocks;
 	}
 
@@ -226,11 +225,11 @@ std::vector<std::unique_ptr<AssDialogueBlock>> AssDialogue::ParseTags() const {
 			if (work.size() && work.find('\\') == std::string::npos) {
 				//We've found an override block with no backslashes
 				//We're going to assume it's a comment and not consider it an override block
-				Blocks.push_back(agi::make_unique<AssDialogueBlockComment>(work));
+				Blocks.push_back(std::make_unique<AssDialogueBlockComment>(work));
 			}
 			else {
 				// Create block
-				auto block = agi::make_unique<AssDialogueBlockOverride>(work);
+				auto block = std::make_unique<AssDialogueBlockOverride>(work);
 				block->ParseTags();
 
 				// Look for \p in block
@@ -258,9 +257,9 @@ plain:
 		}
 
 		if (drawingLevel == 0)
-			Blocks.push_back(agi::make_unique<AssDialogueBlockPlain>(work));
+			Blocks.push_back(std::make_unique<AssDialogueBlockPlain>(work));
 		else
-			Blocks.push_back(agi::make_unique<AssDialogueBlockDrawing>(work, drawingLevel));
+			Blocks.push_back(std::make_unique<AssDialogueBlockDrawing>(work, drawingLevel));
 	}
 
 	return Blocks;

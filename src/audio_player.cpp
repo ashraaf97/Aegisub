@@ -47,6 +47,7 @@ std::unique_ptr<AudioPlayer> CreateOpenALPlayer(agi::AudioProvider *providers, w
 std::unique_ptr<AudioPlayer> CreatePortAudioPlayer(agi::AudioProvider *providers, wxWindow *window);
 std::unique_ptr<AudioPlayer> CreatePulseAudioPlayer(agi::AudioProvider *providers, wxWindow *window);
 std::unique_ptr<AudioPlayer> CreateOSSPlayer(agi::AudioProvider *providers, wxWindow *window);
+std::unique_ptr<AudioPlayer> CreateXAudio2Player(agi::AudioProvider *providers, wxWindow *window);
 
 namespace {
 	struct factory {
@@ -58,6 +59,9 @@ namespace {
 	const factory factories[] = {
 #ifdef WITH_ALSA
 		{"ALSA", CreateAlsaPlayer, false},
+#endif
+#ifdef WITH_XAUDIO2
+		{"XAudio2", CreateXAudio2Player, false},
 #endif
 #ifdef WITH_DIRECTSOUND
 		{"DirectSound-old", CreateDirectSoundPlayer, false},

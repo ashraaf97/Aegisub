@@ -46,3 +46,6 @@ cp $d/vfr/* data/vfr/in/
 
 mkdir data/keyframe
 cp $d/keyframe/* data/keyframe
+
+# Marker file so the build system can tell the setup ran.
+touch applied_test_setup

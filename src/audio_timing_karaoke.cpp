@@ -30,7 +30,6 @@
 #include "selection_controller.h"
 #include "utils.h"
 
-#include <libaegisub/make_unique.h>
 
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -141,7 +140,7 @@ public:
 
 std::unique_ptr<AudioTimingController> CreateKaraokeTimingController(agi::Context *c, AssKaraoke *kara, agi::signal::Connection& file_changed)
 {
-	return agi::make_unique<AudioTimingControllerKaraoke>(c, kara, file_changed);
+	return std::make_unique<AudioTimingControllerKaraoke>(c, kara, file_changed);
 }
 
 AudioTimingControllerKaraoke::AudioTimingControllerKaraoke(agi::Context *c, AssKaraoke *kara, agi::signal::Connection& file_changed)

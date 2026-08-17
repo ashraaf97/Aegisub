@@ -34,7 +34,6 @@
 #include "command.h"
 
 #include <libaegisub/log.h>
-#include <libaegisub/make_unique.h>
 
 #include "../compat.h"
 #include "../dialog_detached_video.h"
@@ -254,6 +253,10 @@ struct app_toggle_toolbar final : public Command {
 	}
 };
 
+// Guarded to match the registration below: PerformVersionCheck is only
+// defined when the update checker is built in, so compiling this command
+// unconditionally leaves an unresolved reference at link time.
+#ifdef WITH_UPDATE_CHECKER
 struct app_updates final : public Command {
 	CMD_NAME("app/updates")
 	STR_MENU("&Check for Updates...")
@@ -264,6 +267,7 @@ struct app_updates final : public Command {
 		PerformVersionCheck(true);
 	}
 };
+#endif
 
 #ifdef __WXMAC__
 struct app_minimize final : public Command {
@@ -304,25 +308,25 @@ struct app_bring_to_front final : public Command {
 
 namespace cmd {
 	void init_app() {
-		reg(agi::make_unique<app_about>());
-		reg(agi::make_unique<app_display_audio_subs>());
-		reg(agi::make_unique<app_display_full>());
-		reg(agi::make_unique<app_display_subs>());
-		reg(agi::make_unique<app_display_video_subs>());
-		reg(agi::make_unique<app_exit>());
-		reg(agi::make_unique<app_language>());
-		reg(agi::make_unique<app_log>());
-		reg(agi::make_unique<app_new_window>());
-		reg(agi::make_unique<app_options>());
-		reg(agi::make_unique<app_toggle_global_hotkeys>());
-		reg(agi::make_unique<app_toggle_toolbar>());
+		reg(std::make_unique<app_about>());
+		reg(std::make_unique<app_display_audio_subs>());
+		reg(std::make_unique<app_display_full>());
+		reg(std::make_unique<app_display_subs>());
+		reg(std::make_unique<app_display_video_subs>());
+		reg(std::make_unique<app_exit>());
+		reg(std::make_unique<app_language>());
+		reg(std::make_unique<app_log>());
+		reg(std::make_unique<app_new_window>());
+		reg(std::make_unique<app_options>());
+		reg(std::make_unique<app_toggle_global_hotkeys>());
+		reg(std::make_unique<app_toggle_toolbar>());
 #ifdef __WXMAC__
-		reg(agi::make_unique<app_minimize>());
-		reg(agi::make_unique<app_maximize>());
-		reg(agi::make_unique<app_bring_to_front>());
+		reg(std::make_unique<app_minimize>());
+		reg(std::make_unique<app_maximize>());
+		reg(std::make_unique<app_bring_to_front>());
 #endif
 #ifdef WITH_UPDATE_CHECKER
-		reg(agi::make_unique<app_updates>());
+		reg(std::make_unique<app_updates>());
 #endif
 	}
 }

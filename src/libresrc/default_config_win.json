@@ -1,6 +1,6 @@
 {
 	"Audio" : {
-		"Player" : "DirectSound"
+		"Player" : "XAudio2"
 	},
 	"Subtitle" : {
 		"Provider" : "CSRI/xy-vsfilter_aegisub"

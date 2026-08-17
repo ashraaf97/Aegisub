@@ -1,0 +1,50 @@
+# Build-time options for Aegisub.
+#
+# These mirror the --with-* / --enable-* switches of the old configure.ac so
+# that existing build recipes translate directly. Audio and video backends are
+# `feature` options: 'auto' takes them if the dependency is present, 'enabled'
+# hard-fails when it is missing, and 'disabled' skips it entirely.
+
+# Audio output backends
+option('alsa', type: 'feature', value: 'auto', description: 'ALSA audio output (Linux)')
+option('openal', type: 'feature', value: 'auto', description: 'OpenAL audio output')
+option('libpulse', type: 'feature', value: 'auto', description: 'PulseAudio audio output (Linux)')
+option('portaudio', type: 'feature', value: 'auto', description: 'PortAudio audio output')
+option('oss', type: 'feature', value: 'auto', description: 'OSS audio output (BSD)')
+option('directsound', type: 'feature', value: 'auto', description: 'DirectSound audio output (Windows)')
+option('xaudio2', type: 'feature', value: 'auto', description: 'XAudio2 audio output (Windows 8+)')
+
+option('default_audio_output', type: 'combo', value: 'auto',
+       choices: ['auto', 'ALSA', 'OpenAL', 'PulseAudio', 'PortAudio', 'OSS', 'DirectSound', 'XAudio2'],
+       description: 'Default audio output backend')
+
+# Audio/video source providers
+option('ffms2', type: 'feature', value: 'auto', description: 'FFMS2 audio/video provider')
+option('avisynth', type: 'feature', value: 'disabled', description: 'AviSynth audio/video provider (Windows)')
+
+# Subtitle rendering
+option('csri', type: 'feature', value: 'auto', description: 'CSRI subtitle provider (Windows, enables VSFilter)')
+
+# Everything else
+option('fftw3', type: 'feature', value: 'auto', description: 'FFTW3 for the audio spectrum display')
+option('hunspell', type: 'feature', value: 'auto', description: 'Hunspell spell checker')
+option('uchardet', type: 'feature', value: 'auto', description: 'uchardet character set detection')
+
+option('enable_update_checker', type: 'boolean', value: false,
+       description: 'Enable the built-in update checker')
+option('update_server', type: 'string', value: 'updates.aegisub.org',
+       description: 'Server for the update checker')
+option('update_url', type: 'string', value: '/trunk',
+       description: 'Path on the update server')
+
+option('credit', type: 'string', value: '',
+       description: 'Build credit shown in the version string')
+
+option('local_boost', type: 'boolean', value: false,
+       description: 'Force the bundled Boost subproject even if a system Boost is present')
+option('system_luajit', type: 'boolean', value: false,
+       description: 'Require a system LuaJIT rather than building the bundled copy')
+option('wx_version', type: 'string', value: '3.2.0',
+       description: 'Minimum wxWidgets version')
+
+option('tests', type: 'feature', value: 'auto', description: 'Build the unit test suite')

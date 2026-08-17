@@ -84,7 +84,7 @@ public:
 	///
 	/// This function blocks until is it is safe for the calling thread to
 	/// modify subs
-	void LoadSubtitles(const AssFile *subs) throw();
+	void LoadSubtitles(const AssFile *subs) noexcept;
 
 	/// @brief Update a previously loaded subtitle file
 	/// @param subs Subtitle file which was last passed to LoadSubtitles
@@ -92,7 +92,7 @@ public:
 	///
 	/// This function only supports changes to existing lines, and not
 	/// insertions or deletions.
-	void UpdateSubtitles(const AssFile *subs, const AssDialogue *changes) throw();
+	void UpdateSubtitles(const AssFile *subs, const AssDialogue *changes) noexcept;
 
 	/// @brief Queue a request for a frame
 	/// @brief frame Frame number
@@ -100,7 +100,7 @@ public:
 	///
 	/// This merely queues up a request and deletes any pending requests; there
 	/// is no guarantee that the requested frame will ever actually be produced
-	void RequestFrame(int frame, double time) throw();
+	void RequestFrame(int frame, double time) noexcept;
 
 	/// @brief Synchronously get a frame
 	/// @brief frame Frame number

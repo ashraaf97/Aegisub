@@ -315,6 +315,10 @@
 				"Buffer Latency" : 100,
 				"Buffer Length" : 5
 			},
+			"XAudio2" : {
+				"Buffer Latency" : 100,
+				"Buffer Length" : 5
+			},
 			"OSS" : {
 				"Device" : "/dev/dsp"
 			},

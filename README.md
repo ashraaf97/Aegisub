@@ -1,98 +1,121 @@
 # Aegisub
 
-For binaries and general information [see the homepage](http://www.aegisub.org).
+Aegisub is a subtitle editor, primarily aimed at typesetting and timing of
+Advanced SubStation Alpha (ASS) subtitles.
 
-The bug tracker can be found at http://devel.aegisub.org.
+## About this repository
 
-Support is available on [the forums](http://forum.aegisub.org) or [on IRC](irc://irc.rizon.net/aegisub).
+This tree is a modernisation of the upstream
+[Aegisub/Aegisub](https://github.com/Aegisub/Aegisub) repository, which has
+been dormant since October 2019. The build system has been ported to
+[Meson](https://mesonbuild.com/), the codebase raised to C++17, and the
+Windows build moved to Visual Studio 2022 and wxWidgets 3.2.
+
+If you are looking for a maintained fork with substantial new *features*
+(video panning, line folding, VapourSynth and BestSource providers), see
+[arch1t3cht/Aegisub](https://github.com/arch1t3cht/Aegisub), whose Meson build
+scaffolding this port builds on.
 
 ## Building Aegisub
 
 ### Windows
 
+This is the supported and tested platform.
+
 Prerequisites:
 
-1. Visual Studio 2015 (the free Community edition is good enough)
-2. The June 2010 DirectX SDK (the final release before DirectSound was dropped)
-3. [Yasm](http://yasm.tortall.net/) installed to somewhere on your path.
+1. **Visual Studio 2022** with the "Desktop development with C++" workload, or
+   the standalone [Build Tools for Visual Studio 2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022).
+   The Windows 10/11 SDK is included with that workload.
+2. **Python 3.8 or newer**.
+3. **Meson and Ninja**: `pip install meson ninja`
 
-There are a few optional dependencies:
+The June 2010 DirectX SDK is *no longer required*. Audio output now uses
+XAudio2, which ships with the Windows SDK; DirectSound remains available as a
+fallback and also builds against the modern SDK.
 
-1. msgfmt, to build the translations
-2. WinRAR, to build the portable installer
-3. InnoSetup, to build the regular installer
+Building, from a Visual Studio developer command prompt (or any shell where
+`vcvars64.bat` has been run):
 
-All other dependencies are either stored in the repository or are included as submodules.
+```
+git clone https://github.com/Aegisub/Aegisub.git
+cd Aegisub
+meson setup build-win --default-library=static
+meson compile -C build-win
+```
 
-Building:
+`--default-library=static` is required: ICU does not support a shared build on
+Windows, and Aegisub has always shipped as a self-contained executable.
 
-1. Clone Aegisub's repository recursively to fetch it and all submodules: `git clone --recursive git@github.com:Aegisub/Aegisub.git` This will take quite a while and requires about 2.5 GB of disk space.
-2. Open Aegisub.sln
-3. Build the BuildTasks project.
-4. Build the entire solution.
+The first configure downloads and builds every dependency (Boost, ICU,
+wxWidgets, FFmpeg, libass, LuaJIT and others) as Meson subprojects, so expect
+it to take a while and a few GB of disk. Subsequent builds are incremental.
+There is no longer any need to clone submodules — `git clone --recursive` is
+not used and `.gitmodules` has been retired.
 
-You should now have a `bin` directory in your Aegisub directory which contains `aegisub32d.exe`, along with a pile of other files.
+The result is `build-win/aegisub.exe`. To run it against the automation
+scripts in this tree, either copy the `automation` directory next to the
+executable or add it to the automation search path in Preferences.
 
-The Aegisub installer includes some files not built as part of Aegisub (such as Avisynth and VSFilter), so for a fully functional copy of Aegisub you now need to copy all of the files from an installed copy of Aegisub into your `bin` directory (and don't overwrite any of the files already there).
-You'll also either need to copy the `automation` directory into the `bin` directory, or edit your automation search paths to include the `automation` directory in the source tree.
+To run the test suite:
 
-After building the solution once, you'll want to switch to the Debug-MinDep configuration, which skips checking if the dependencies are out of date, as that takes a while.
+```
+meson test -C build-win --print-errorlogs
+```
 
-### OS X
+Useful configure options (`meson configure build-win` lists all of them):
 
-A vaguely recent version of Xcode and the corresponding command-line tools are required.
-Nothing older than Xcode 5 has been tested recently, but it is likely that some later versions of Xcode 4 are good enough.
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `-Dxaudio2=` | `auto` | XAudio2 audio output |
+| `-Ddirectsound=` | `auto` | DirectSound audio output |
+| `-Dffms2=` | `auto` | FFMS2 audio/video source |
+| `-Dhunspell=` | `auto` | Spell checking |
+| `-Duchardet=` | `auto` | Character set detection |
+| `-Dcsri=` | `auto` | CSRI subtitle provider (VSFilter) |
+| `-Dtests=` | `auto` | Build the unit tests |
+| `-Ddefault_audio_output=` | `auto` | Force a specific audio backend |
 
-For personal usage, you can use homebrew to install almost all of Aegisub's dependencies:
+The Aegisub installer bundles some files that are not built here (VSFilter,
+for instance), so for a fully featured copy you may still want to copy the
+extra files from an installed release into the build output.
 
-	brew install autoconf ffmpeg freetype gettext ffms2 fftw fribidi libass m4
-	brew install --devel --with-gc64 luajit
-	brew install --HEAD icu4c
-	brew link --force icu4c
-	brew link --force gettext
-	brew install --HEAD --c++11 --with-icu4c boost
+### Linux and macOS
 
-wxWidgets is located in vendor/wxWidgets, and can be built like so:
+The autotools build (`configure.ac` and the per-directory makefiles) is still
+present but is **not currently verified** — this modernisation targeted
+Windows. The Meson build contains the non-Windows code paths and should be a
+better starting point than autotools:
 
-	CPPFLAGS="$CPPFLAGS -D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=1" \
-	./configure --disable-aboutdlg --disable-animatectrl --disable-aui --disable-any \
-	--disable-bannerwindow --disable-base64 --disable-calendar --disable-caret \
-	--disable-cmdline --disable-colourpicker --disable-compat28 --disable-config \
-	--disable-constraints --disable-datepick --disable-dctransform --disable-debugreport \
-	--disable-dialupman --disable-docview --disable-filehistory --disable-finddlg \
-	--disable-fs_archive --disable-fs_inet --disable-fs_zip --disable-fsvolume \
-	--disable-fswatcher --disable-gif --disable-help --disable-html --disable-ipc \
-	--disable-joystick --disable-jpeg --disable-largefile --disable-markup --disable-mdi \
-	--disable-mediactrl --disable-metafiles --disable-miniframe --disable-notifmsg \
-	--disable-numberdlg --disable-pcx --disable-pnm --disable-postscript \
-	--disable-prefseditor --disable-printarch --disable-progressdlg --disable-propgrid \
-	--disable-protocol --disable-protocols --disable-rearrangectrl --disable-ribbon \
-	--disable-richtext --disable-richtooltip --disable-snglinst --disable-sockets \
-	--disable-sockets --disable-sound --disable-splash --disable-splines \
-	--disable-std_iostreams --disable-svg --disable-tarstream --disable-tiff \
-	--disable-tipdlg --disable-tipwindow --disable-url --disable-webkit --disable-webview \
-	--disable-wizarddlg --disable-xrc \
-	--enable-geometry --enable-imaglist --enable-listctrl --enable-stc --with-cocoa \
-	--with-libpng=yes --with-macosx-version-min=10.9 \
-	--with-opengl \
-	--without-libjpeg --without-libtiff --without-regex \
-	&& make
+```
+meson setup build
+meson compile -C build
+```
 
-Once the dependencies are installed, build Aegisub with `autoreconf && ./configure --with-wxdir=/path/to/Aegisub/vendor/wxWidgets && make && make osx-bundle`.
-`autoreconf` should be skipped if you are building from a source tarball rather than `git`.
+Expect to need to fix up dependency detection.
 
 ## Updating Moonscript
 
-From within the Moonscript repository, run `bin/moon bin/splat.moon -l moonscript moonscript/ > bin/moonscript.lua`.
-Open the newly created `bin/moonscript.lua`, and within it make the following changes:
+From within the Moonscript repository, run
+`bin/moon bin/splat.moon -l moonscript moonscript/ > bin/moonscript.lua`.
+Open the newly created `bin/moonscript.lua`, and within it make the following
+changes:
 
-1. Prepend the final line of the file, `package.preload["moonscript"]()`, with a `return`, producing `return package.preload["moonscript"]()`.
-2. Within the function at `package.preload['moonscript.base']`, remove references to `moon_loader`, `insert_loader`, and `remove_loader`. This means removing their declarations, definitions, and entries in the returned table.
-3. Within the function at `package.preload['moonscript']`, remove the line `_with_0.insert_loader()`.
+1. Prepend the final line of the file, `package.preload["moonscript"]()`, with
+   a `return`, producing `return package.preload["moonscript"]()`.
+2. Within the function at `package.preload['moonscript.base']`, remove
+   references to `moon_loader`, `insert_loader`, and `remove_loader`. This
+   means removing their declarations, definitions, and entries in the returned
+   table.
+3. Within the function at `package.preload['moonscript']`, remove the line
+   `_with_0.insert_loader()`.
 
-The file is now ready for use, to be placed in `automation/include` within the Aegisub repo.
+The file is now ready for use, to be placed in `automation/include` within the
+Aegisub repo.
 
 ## License
 
-All files in this repository are licensed under various GPL-compatible BSD-style licenses; see LICENCE and the individual source files for more information.
-The official Windows and OS X builds are GPLv2 due to including fftw3.
+All files in this repository are licensed under various GPL-compatible
+BSD-style licenses; see LICENCE and the individual source files for more
+information. The official Windows and OS X builds are GPLv2 due to including
+fftw3.

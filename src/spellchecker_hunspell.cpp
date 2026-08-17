@@ -25,13 +25,14 @@
 #include <libaegisub/line_iterator.h>
 #include <libaegisub/log.h>
 #include <libaegisub/path.h>
-#include <libaegisub/make_unique.h>
 
 #include <boost/range/algorithm.hpp>
 
 #define HUNSPELL_STATIC
 #undef near
-#include <hunspell/hunspell.hxx>
+// Both the pkg-config module and the Meson subproject put hunspell.hxx
+// directly on the include path.
+#include <hunspell.hxx>
 
 HunspellSpellChecker::HunspellSpellChecker()
 : lang_listener(OPT_SUB("Tool/Spell Checker/Language", &HunspellSpellChecker::OnLanguageChanged, this))
@@ -198,14 +199,14 @@ void HunspellSpellChecker::OnLanguageChanged() {
 
 #ifdef _WIN32
 	// The prefix makes hunspell assume the paths are UTF-8 and use _wfopen
-	hunspell = agi::make_unique<Hunspell>(("\\\\?\\" + aff.string()).c_str(), ("\\\\?\\" + dic.string()).c_str());
+	hunspell = std::make_unique<Hunspell>(("\\\\?\\" + aff.string()).c_str(), ("\\\\?\\" + dic.string()).c_str());
 #else
-	hunspell = agi::make_unique<Hunspell>(aff.string().c_str(), dic.string().c_str());
+	hunspell = std::make_unique<Hunspell>(aff.string().c_str(), dic.string().c_str());
 #endif
 	if (!hunspell) return;
 
-	conv = agi::make_unique<agi::charset::IconvWrapper>("utf-8", hunspell->get_dic_encoding());
-	rconv = agi::make_unique<agi::charset::IconvWrapper>(hunspell->get_dic_encoding(), "utf-8");
+	conv = std::make_unique<agi::charset::IconvWrapper>("utf-8", hunspell->get_dic_encoding());
+	rconv = std::make_unique<agi::charset::IconvWrapper>(hunspell->get_dic_encoding(), "utf-8");
 
 	userDicPath = config::path->Decode("?user/dictionaries")/agi::format("user_%s.dic", language);
 	ReadUserDictionary();

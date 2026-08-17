@@ -23,7 +23,9 @@ eyedropper_cursor CURSOR "../bitmaps/windows/eyedropper.cur"
 #define wxUSE_NO_MANIFEST 1
 #include "wx/msw/wx.rc"
 
-#include "../../build/git_version.h"
+// Found via the include path rather than a relative path: Meson generates
+// this into the build directory, not into the source tree.
+#include "git_version.h"
 #include <Winver.h>
 
 #ifdef _DEBUG

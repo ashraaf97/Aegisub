@@ -21,6 +21,7 @@
 ///        rewrite, keeping override tags and drawings intact.
 /// @ingroup libaegisub ass
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -53,5 +54,21 @@ bool ReplaceTextSegments(std::string const& body,
                          std::vector<TextSegment> const& segments,
                          std::vector<std::string> const& replacements,
                          std::string &out);
+
+/// Render texts as a numbered list, one per line, for a language model.
+///
+/// Numbering is what makes the reply matchable: models reorder, merge and drop
+/// lines, and without an explicit index there is no way to tell which output
+/// belongs to which input. Newlines inside an item are escaped so one item
+/// always occupies exactly one line.
+std::string BuildNumberedList(std::vector<std::string> const& texts);
+
+/// Parse a numbered list produced in reply to BuildNumberedList.
+///
+/// Returns index -> text for every "N. text" or "N<tab>text" line recognised.
+/// Anything else -- preamble, code fences, commentary the model added -- is
+/// ignored rather than treated as content. Indices are 1-based, matching what
+/// BuildNumberedList emits; the caller decides what a missing index means.
+std::map<size_t, std::string> ParseNumberedList(std::string const& reply);
 
 } }

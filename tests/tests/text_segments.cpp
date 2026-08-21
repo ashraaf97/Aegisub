@@ -121,6 +121,72 @@ TEST(lagi_text_segments, out_of_range_segment_is_rejected) {
 	EXPECT_FALSE(ReplaceTextSegments("abc", {{1, 99}}, {"x"}, out));
 }
 
+TEST(lagi_numbered_list, round_trips) {
+	std::vector<std::string> const in = {"first", "second", "third"};
+	auto parsed = ParseNumberedList(BuildNumberedList(in));
+
+	ASSERT_EQ(3u, parsed.size());
+	EXPECT_EQ("first", parsed[1]);
+	EXPECT_EQ("second", parsed[2]);
+	EXPECT_EQ("third", parsed[3]);
+}
+
+TEST(lagi_numbered_list, embedded_newline_survives) {
+	std::vector<std::string> const in = {"one\ntwo"};
+	auto parsed = ParseNumberedList(BuildNumberedList(in));
+	ASSERT_EQ(1u, parsed.size());
+	EXPECT_EQ("one\ntwo", parsed[1]);
+}
+
+TEST(lagi_numbered_list, accepts_the_separators_models_actually_use) {
+	auto parsed = ParseNumberedList("1. dot\n2) paren\n3: colon\n4\ttab\n");
+	ASSERT_EQ(4u, parsed.size());
+	EXPECT_EQ("dot", parsed[1]);
+	EXPECT_EQ("paren", parsed[2]);
+	EXPECT_EQ("colon", parsed[3]);
+	EXPECT_EQ("tab", parsed[4]);
+}
+
+TEST(lagi_numbered_list, ignores_commentary_and_fences) {
+	// Models like to explain themselves; none of this is content.
+	auto parsed = ParseNumberedList(
+		"Sure, here are the corrected lines:\n"
+		"```\n"
+		"1. real\n"
+		"```\n"
+		"Let me know if you want changes!\n");
+	ASSERT_EQ(1u, parsed.size());
+	EXPECT_EQ("real", parsed[1]);
+}
+
+TEST(lagi_numbered_list, missing_indices_are_simply_absent) {
+	auto parsed = ParseNumberedList("1. a\n3. c\n");
+	EXPECT_EQ(2u, parsed.size());
+	EXPECT_TRUE(parsed.find(2) == parsed.end());
+}
+
+TEST(lagi_numbered_list, repeated_index_keeps_the_first) {
+	auto parsed = ParseNumberedList("1. first\n1. second\n");
+	ASSERT_EQ(1u, parsed.size());
+	EXPECT_EQ("first", parsed[1]);
+}
+
+TEST(lagi_numbered_list, rejects_non_items) {
+	// "12abc" has digits but is not a numbered item, and 0 is not a valid
+	// index because the numbering we emit is 1-based.
+	EXPECT_TRUE(ParseNumberedList("12abc\n").empty());
+	EXPECT_TRUE(ParseNumberedList("0. zero\n").empty());
+	EXPECT_TRUE(ParseNumberedList("no numbers here\n").empty());
+	EXPECT_TRUE(ParseNumberedList("").empty());
+}
+
+TEST(lagi_numbered_list, carriage_returns_are_stripped) {
+	auto parsed = ParseNumberedList("1. a\r\n2. b\r\n");
+	ASSERT_EQ(2u, parsed.size());
+	EXPECT_EQ("a", parsed[1]);
+	EXPECT_EQ("b", parsed[2]);
+}
+
 TEST(lagi_text_segments, segments_are_ordered_and_disjoint) {
 	auto segs = TextSegments("a{\\i1}bb{\\i0}ccc{\\b1}d");
 	size_t prev_end = 0;

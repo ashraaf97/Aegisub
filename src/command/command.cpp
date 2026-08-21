@@ -60,6 +60,7 @@ namespace cmd {
 
 	// These forward declarations exist here since we don't want to expose
 	// them in a header, they're strictly internal-use.
+	void init_ai();
 	void init_app();
 	void init_audio();
 	void init_automation();
@@ -78,6 +79,7 @@ namespace cmd {
 
 	void init_builtin_commands() {
 		LOG_D("command/init") << "Populating command map";
+		init_ai();
 		init_app();
 		init_audio();
 		init_automation();

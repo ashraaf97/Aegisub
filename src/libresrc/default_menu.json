@@ -34,9 +34,17 @@
         { "submenu" : "main/timing",   "text" : "&Timing" },
         { "submenu" : "main/video",    "text" : "&Video" },
         { "submenu" : "main/audio",    "text" : "&Audio" },
+        { "submenu" : "main/ai",       "text" : "A&I" },
         { "special" : "automation",    "text" : "A&utomation" },
         { "submenu" : "main/view",     "text" : "Vie&w" },
         { "submenu" : "main/help",     "text" : "&Help", "special" : "help" }
+    ],
+    "main/ai" : [
+        { "command" : "ai/proofread" },
+        { "command" : "ai/rephrase" },
+        { "command" : "ai/translate" },
+        {},
+        { "command" : "ai/prompt" }
     ],
     "main/file" : [
         { "command" : "subtitle/new" },

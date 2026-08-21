@@ -23,6 +23,11 @@
 
 #include "libaegisub/ass/dialogue_parser.h"
 
+#include <cctype>
+#include <exception>
+#include <sstream>
+#include <stdexcept>
+
 namespace {
 namespace dt = agi::ass::DialogueTokenType;
 }
@@ -40,9 +45,8 @@ std::vector<TextSegment> TextSegments(std::string const& body) {
 
 	for (auto const& tok : tokens) {
 		if (tok.type == dt::TEXT && tok.length > 0) {
-			// The tokenizer emits one TEXT token per run, but coalesce
-			// adjacent ones anyway so callers never see a run split in a
-			// place that has no meaning to a reader.
+			// Coalesce runs that touch, so a caller never sees a run split at
+			// a point that means nothing to a reader.
 			if (!segments.empty() && segments.back().begin + segments.back().length == pos)
 				segments.back().length += tok.length;
 			else
@@ -81,6 +85,82 @@ bool ReplaceTextSegments(std::string const& body,
 
 	out = std::move(result);
 	return true;
+}
+
+std::string BuildNumberedList(std::vector<std::string> const& texts) {
+	std::string out;
+	for (size_t i = 0; i < texts.size(); ++i) {
+		out += std::to_string(i + 1);
+		out += ". ";
+		// An item has to stay on one line, or the numbering stops being a
+		// reliable way to line the reply up with the input.
+		for (char c : texts[i]) {
+			if (c == '\n')
+				out += "\\n";
+			else if (c != '\r')
+				out += c;
+		}
+		out += '\n';
+	}
+	return out;
+}
+
+std::map<size_t, std::string> ParseNumberedList(std::string const& reply) {
+	std::map<size_t, std::string> out;
+
+	std::istringstream ss(reply);
+	std::string line;
+	while (std::getline(ss, line)) {
+		if (!line.empty() && line.back() == '\r')
+			line.pop_back();
+
+		size_t i = 0;
+		while (i < line.size() && std::isspace(static_cast<unsigned char>(line[i])))
+			++i;
+
+		size_t const digits_begin = i;
+		while (i < line.size() && std::isdigit(static_cast<unsigned char>(line[i])))
+			++i;
+		if (i == digits_begin) continue; // No leading number: commentary.
+
+		size_t index = 0;
+		try {
+			index = static_cast<size_t>(std::stoul(line.substr(digits_begin, i - digits_begin)));
+		}
+		catch (std::exception const&) {
+			continue; // Absurdly long digit run; not an index.
+		}
+		if (index == 0) continue; // Numbering is 1-based.
+
+		// Accept "1. text", "1) text", "1: text" and "1<tab>text": which of
+		// these a model picks is not something we can rely on.
+		if (i < line.size() && (line[i] == '.' || line[i] == ')' || line[i] == ':'))
+			++i;
+		else if (i >= line.size() || (line[i] != ' ' && line[i] != '\t'))
+			continue; // "12abc" is not a numbered item.
+
+		while (i < line.size() && (line[i] == ' ' || line[i] == '\t'))
+			++i;
+
+		std::string const text = line.substr(i);
+
+		// Undo the escaping BuildNumberedList applies.
+		std::string unescaped;
+		for (size_t j = 0; j < text.size(); ++j) {
+			if (text[j] == '\\' && j + 1 < text.size() && text[j + 1] == 'n') {
+				unescaped += '\n';
+				++j;
+			}
+			else
+				unescaped += text[j];
+		}
+
+		// First occurrence wins: a model that repeats an index is usually
+		// restating its answer, and the first is what it committed to.
+		out.emplace(index, unescaped);
+	}
+
+	return out;
 }
 
 } }

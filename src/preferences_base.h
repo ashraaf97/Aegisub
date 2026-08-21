@@ -42,6 +42,10 @@ public:
 	wxFlexGridSizer *PageSizer(wxString name);
 
 	void CellSkip(wxFlexGridSizer *flex);
+	/// Place a caller-built control in the two-column grid, laid out as
+	/// OptionAdd does. For fields OptionAdd cannot express -- the AI API key,
+	/// which has to be encrypted on the way into the option.
+	void AddLabelled(wxSizer *sizer, wxString const& label, wxControl *control);
 	wxControl *OptionAdd(wxFlexGridSizer *flex, const wxString &name, const char *opt_name, double min=0, double max=INT_MAX, double inc=1);
 	void OptionChoice(wxFlexGridSizer *flex, const wxString &name, const wxArrayString &choices, const char *opt_name);
 	void OptionBrowse(wxFlexGridSizer *flex, const wxString &name, const char *opt_name, wxControl *enabler = nullptr, bool do_enable = false);

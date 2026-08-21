@@ -6,6 +6,8 @@ subdir('libresrc')
 aegisub_src = files(
     'MatroskaParser.c',
     'aegisublocale.cpp',
+    'ai_client.cpp',
+    'ai_credentials.cpp',
     'ass_attachment.cpp',
     'ass_dialogue.cpp',
     'ass_entry.cpp',

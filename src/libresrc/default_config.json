@@ -1,4 +1,12 @@
 {
+	"AI" : {
+		"API Key" : "",
+		"Endpoint" : "https://ollama.com",
+		"Max Lines Per Request" : 25,
+		"Model" : "gpt-oss:120b",
+		"Timeout" : 60
+	},
+
 	"App" : {
 		"Auto" : {
 			"Backup" : true,

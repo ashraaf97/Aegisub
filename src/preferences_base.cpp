@@ -109,6 +109,10 @@ void OptionPage::CellSkip(wxFlexGridSizer *flex) {
 	flex->AddStretchSpacer();
 }
 
+void OptionPage::AddLabelled(wxSizer *sizer, wxString const& label, wxControl *control) {
+	Add(sizer, label, control);
+}
+
 wxControl *OptionPage::OptionAdd(wxFlexGridSizer *flex, const wxString &name, const char *opt_name, double min, double max, double inc) {
 	parent->AddChangeableOption(opt_name);
 	const auto opt = OPT_GET(opt_name);

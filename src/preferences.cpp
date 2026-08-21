@@ -18,6 +18,8 @@
 
 #include "preferences.h"
 
+#include "ai_client.h"
+#include "ai_credentials.h"
 #include "ass_style_storage.h"
 #include "audio_provider_factory.h"
 #include "audio_renderer_waveform.h"
@@ -43,8 +45,10 @@
 
 #include <libaegisub/hotkey.h>
 
+#include <cstdlib>
 #include <unordered_set>
 
+#include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/combobox.h>
 #include <wx/event.h>
@@ -54,6 +58,7 @@
 #include <wx/sizer.h>
 #include <wx/spinctrl.h>
 #include <wx/stattext.h>
+#include <wx/textctrl.h>
 #include <wx/treebook.h>
 
 namespace {
@@ -196,6 +201,71 @@ void Video(wxTreebook *book, Preferences *parent) {
 	const wxString cres_arr[] = {_("Never"), _("Ask"), _("Always set"), _("Always resample")};
 	wxArrayString choice_res(4, cres_arr);
 	p->OptionChoice(resolution, _("Match video resolution on open"), choice_res, "Video/Script Resolution Mismatch");
+
+	p->SetSizerAndFit(p->sizer);
+}
+
+/// AI preferences page
+void AI(wxTreebook *book, Preferences *parent) {
+	auto p = new OptionPage(book, parent, _("AI"));
+
+	auto conn = p->PageSizer(_("Ollama Cloud"));
+
+	// The key is stored wrapped (DPAPI on Windows), so it cannot go through
+	// OptionAdd: the field has to show the unwrapped value and re-wrap on
+	// every edit, otherwise the plaintext key lands in the config file.
+	parent->AddChangeableOption("AI/API Key");
+	auto key = new wxTextCtrl(p, -1, to_wx(ai::Unprotect(OPT_GET("AI/API Key")->GetString())),
+	                          wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+	key->Bind(wxEVT_TEXT, [parent](wxCommandEvent &evt) {
+		evt.Skip();
+		parent->SetOption(std::make_unique<agi::OptionValueString>(
+			"AI/API Key", ai::Protect(from_wx(evt.GetString()))));
+	});
+	p->AddLabelled(conn, _("API key"), key);
+
+	p->OptionAdd(conn, _("Model"), "AI/Model");
+	p->OptionAdd(conn, _("Endpoint"), "AI/Endpoint");
+	p->OptionAdd(conn, _("Lines per request"), "AI/Max Lines Per Request", 1, 200);
+	p->OptionAdd(conn, _("Timeout (seconds)"), "AI/Timeout", 5, 600);
+
+	auto test = new wxButton(p, -1, _("Test connection"));
+	auto status = new wxStaticText(p, -1, "");
+	p->AddLabelled(conn, "", test);
+	p->AddLabelled(conn, "", status);
+
+	test->Bind(wxEVT_BUTTON, [p, key, status, test](wxCommandEvent &) {
+		// Deliberately the field's current text and not the stored option:
+		// a key typed just now is still sitting in the dialog's pending
+		// changes and will not reach the options until Apply.
+		std::string typed = from_wx(key->GetValue());
+		if (typed.empty()) {
+			status->SetLabel(_("Enter an API key first."));
+			return;
+		}
+
+		test->Enable(false);
+		status->SetLabel(_("Testing..."));
+		ai::ChatWithKey(p, typed,
+		                "You are a connection test. Reply with exactly: OK",
+		                "Reply with exactly: OK",
+		                [status, test](ai::ChatResult r) {
+			test->Enable(true);
+			status->SetLabel(r.ok ? _("Connection succeeded.") : to_wx(r.error));
+		});
+	});
+
+	if (const char *env = std::getenv("OLLAMA_API_KEY")) {
+		if (*env)
+			p->sizer->Add(new wxStaticText(p, -1,
+				_("OLLAMA_API_KEY is set in the environment and overrides the key above.")),
+				0, wxALL, 5);
+	}
+
+	if (!ai::ProtectionAvailable())
+		p->sizer->Add(new wxStaticText(p, -1,
+			_("Note: this platform has no key encryption, so the key is stored as plain text.")),
+			0, wxALL, 5);
 
 	p->SetSizerAndFit(p->sizer);
 }
@@ -708,6 +778,7 @@ Preferences::Preferences(wxWindow *parent): wxDialog(parent, -1, _("Preferences"
 	new Interface_Hotkeys(book, this);
 	Backup(book, this);
 	Automation(book, this);
+	AI(book, this);
 	Advanced(book, this);
 	Advanced_Audio(book, this);
 	Advanced_Video(book, this);
